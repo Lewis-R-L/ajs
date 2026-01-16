@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>安基昇 Anjisheng | 精准医疗与表观遗传检测</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* 100% 还原第一版 Hero 背景 */
+        .hero-bg {
+            background-image: linear-gradient(rgba(10, 25, 47, 0.85), rgba(30, 64, 175, 0.7)), url('images/hero.png');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
+        
+        /* 100% 还原第一版卡片悬停特效 */
+        .service-card {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .service-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        
+        .img-container {
+            overflow: hidden;
+            height: 240px;
+        }
+        .img-container img {
+            transition: transform 0.5s ease;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .service-card:hover .img-container img {
+            transform: scale(1.05);
+        }
+
+        /* 弹窗专用动画 */
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: scale(0.98) translateY(10px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        .modal-active {
+            display: flex !important;
+            animation: modalFadeIn 0.2s ease-out forwards;
+        }
+
+        /* 语言切换器样式 */
+        .lang-switcher {
+            position: relative;
+        }
+        .lang-dropdown {
+            display: none;
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 0.5rem;
+            background: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            min-width: 140px;
+            z-index: 50;
+        }
+        .lang-dropdown.show {
+            display: block;
+        }
+        .lang-option {
+            display: block;
+            padding: 0.75rem 1rem;
+            color: #475569;
+            text-decoration: none;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        .lang-option:hover {
+            background: #f1f5f9;
+            color: #1e40af;
+        }
+        .lang-option.active {
+            background: #eff6ff;
+            color: #1e40af;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans antialiased">
+
+    <nav class="fixed w-full z-50 bg-white/90 backdrop-blur-md shadow-sm transition-all duration-300">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="flex items-center gap-2">
+                <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold text-xs">A</div>
+                <h1 class="text-2xl font-extrabold text-blue-900 tracking-wide">安基昇 <span class="text-blue-500 font-light">ANJISHENG</span></h1>
+            </div>
+            
+            <div class="hidden md:flex space-x-10 text-sm font-semibold text-slate-600 uppercase tracking-wider">
+                <a href="#services" data-i18n="nav.services" class="hover:text-blue-600 transition-colors">核心服务</a>
+                <a href="#about" data-i18n="nav.about" class="hover:text-blue-600 transition-colors">关于我们</a>
+                <a href="#cooperation" data-i18n="nav.cooperation" class="hover:text-blue-600 transition-colors">全球合作</a>
+            </div>
+
+            <div class="flex items-center gap-4">
+                <div class="lang-switcher relative">
+                    <button onclick="toggleLangDropdown()" class="flex items-center gap-2 text-slate-600 hover:text-blue-600 transition-colors text-sm font-medium">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.196 9.97a3.001 3.001 0 001.196-1.97m-2.28 2.28a3.001 3.001 0 000 2.16m.84-4.44a3.001 3.001 0 010 2.16m-1.12-4.44a3.001 3.001 0 00-1.196-1.97M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <span id="currentLang">中文</span>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+                    <div id="langDropdown" class="lang-dropdown">
+                        <a onclick="switchLanguage('zh-CN')" class="lang-option" data-lang="zh-CN">简体中文</a>
+                        <a onclick="switchLanguage('zh-TW')" class="lang-option" data-lang="zh-TW">繁體中文</a>
+                        <a onclick="switchLanguage('en')" class="lang-option" data-lang="en">English</a>
+                    </div>
+                </div>
+                <button onclick="toggleModal(true)" data-i18n="nav.contact" class="hidden md:block bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-full font-medium transition shadow-md shadow-blue-200">
+                    联系专家
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <section class="hero-bg min-h-screen flex items-center justify-center text-white px-6 relative">
+        <div class="container mx-auto text-center z-10 mt-16">
+            <span class="inline-block py-1 px-3 rounded-full bg-blue-500/20 border border-blue-400/30 text-blue-200 text-sm font-semibold mb-6 animate-pulse" data-i18n="hero.tagline">
+                前沿生物科技 · 定义未来健康
+            </span>
+            <h2 class="text-5xl md:text-7xl font-bold mb-8 leading-tight drop-shadow-lg">
+                <span data-i18n="hero.title1">解码生命表观遗传</span><br>
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-200 to-cyan-200" data-i18n="hero.title2">预见精准健康未来</span>
+            </h2>
+            <p class="text-lg md:text-xl mb-12 opacity-90 max-w-2xl mx-auto font-light leading-relaxed" data-i18n="hero.description">
+                安基昇 (Anjisheng) 致力于通过前沿的 DNA 甲基化检测与基因组学技术，为您提供全方位的疾病风险评估与生物年龄管理方案。
+            </p>
+            <div class="flex flex-col md:flex-row gap-5 justify-center">
+                <button class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-8 rounded-full shadow-xl transition transform hover:scale-105" data-i18n="hero.btn1">
+                    探索生物年龄检测
+                </button>
+                <button onclick="toggleModal(true)" class="bg-transparent border border-white/40 hover:bg-white/10 text-white font-semibold py-4 px-8 rounded-full backdrop-blur-sm transition" data-i18n="hero.btn2">
+                    了解我们的技术
+                </button>
+            </div>
+        </div>
+        
+        <div class="absolute bottom-0 left-0 w-full overflow-hidden leading-none rotate-180">
+            <svg class="relative block w-[calc(100%+1.3px)] h-[60px]" viewBox="0 0 1200 120" preserveAspectRatio="none">
+                <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z" class="fill-slate-50"></path>
+            </svg>
+        </div>
+    </section>
+
+    <section id="services" class="py-24 bg-slate-50">
+        <div class="container mx-auto px-6">
+            <div class="text-center mb-16">
+                <h3 class="text-blue-600 font-bold tracking-widest uppercase text-sm mb-3" data-i18n="services.subtitle">Core Services</h3>
+                <h2 class="text-4xl font-bold text-slate-900" data-i18n="services.title">核心业务领域</h2>
+                <div class="w-24 h-1.5 bg-blue-600 mx-auto mt-6 rounded-full"></div>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="service-card bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden group">
+                    <div class="img-container">
+                        <img src="images/epigenetic.png" alt="表观遗传检测">
+                    </div>
+                    <div class="p-8">
+                        <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-6 text-blue-600">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.384-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
+                        </div>
+                        <h4 class="text-xl font-bold mb-3 text-slate-800" data-i18n="services.epigenetic.title">表观遗传检测 (Epigenetic)</h4>
+                        <p class="text-slate-600 mb-4 leading-relaxed text-sm" data-i18n="services.epigenetic.desc">基于 DNA 甲基化技术，精准锁定基因表达开关。</p>
+                        <ul class="text-sm text-slate-500 space-y-2 mb-6">
+                            <li class="flex items-center"><span class="w-1.5 h-1.5 bg-blue-500 rounded-full mr-2"></span><span data-i18n="services.epigenetic.item1">癌症早期筛查 (Cancer)</span></li>
+                            <li class="flex items-center"><span class="w-1.5 h-1.5 bg-blue-500 rounded-full mr-2"></span><span data-i18n="services.epigenetic.item2">神经系统与发育疾病</span></li>
+                            <li class="flex items-center font-semibold text-blue-600"><span class="w-1.5 h-1.5 bg-blue-600 rounded-full mr-2"></span><span data-i18n="services.epigenetic.item3">生物年龄评估 (Biological Age)</span></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="service-card bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden group">
+                    <div class="img-container">
+                        <img src="images/genetic.png" alt="基因组学分析">
+                    </div>
+                    <div class="p-8">
+                        <div class="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center mb-6 text-indigo-600">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+                        </div>
+                        <h4 class="text-xl font-bold mb-3 text-slate-800" data-i18n="services.genetic.title">基因组学分析 (Genetic Test)</h4>
+                        <p class="text-slate-600 mb-4 leading-relaxed text-sm" data-i18n="services.genetic.desc">利用高通量测序技术，深度解析遗传密码。</p>
+                        <ul class="text-sm text-slate-500 space-y-2 mb-6">
+                            <li class="flex items-center"><span class="w-1.5 h-1.5 bg-indigo-500 rounded-full mr-2"></span><span data-i18n="services.genetic.item1">基因突变 (Mutations)</span></li>
+                            <li class="flex items-center"><span class="w-1.5 h-1.5 bg-indigo-500 rounded-full mr-2"></span><span data-i18n="services.genetic.item2">遗传变异 (Variants)</span></li>
+                            <li class="flex items-center"><span class="w-1.5 h-1.5 bg-indigo-500 rounded-full mr-2"></span><span data-i18n="services.genetic.item3">STR 亲缘/身份鉴定</span></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="service-card bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden group">
+                    <div class="img-container">
+                        <img src="images/consult.png" alt="医学科学咨询">
+                    </div>
+                    <div class="p-8">
+                        <div class="w-12 h-12 bg-teal-100 rounded-lg flex items-center justify-center mb-6 text-teal-600">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                        </div>
+                        <h4 class="text-xl font-bold mb-3 text-slate-800" data-i18n="services.consult.title">医学科学咨询 (Consult)</h4>
+                        <p class="text-slate-600 mb-4 leading-relaxed text-sm" data-i18n="services.consult.desc">从实验室数据到临床应用，提供个性化方案。</p>
+                        <ul class="text-sm text-slate-500 space-y-2 mb-6">
+                            <li class="flex items-center"><span class="w-1.5 h-1.5 bg-teal-500 rounded-full mr-2"></span><span data-i18n="services.consult.item1">创始人与社长亲自领衔</span></li>
+                            <li class="flex items-center"><span class="w-1.5 h-1.5 bg-teal-500 rounded-full mr-2"></span><span data-i18n="services.consult.item2">全球顶尖顾问团队</span></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="cooperation" class="py-24 bg-blue-900 text-white relative overflow-hidden">
+        <div class="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20"></div>
+        <div class="absolute bottom-0 left-0 -ml-20 -mb-20 w-96 h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20"></div>
+
+        <div class="container mx-auto px-6 relative z-10">
+            <div class="flex flex-col md:flex-row items-center justify-between gap-16">
+                <div class="md:w-1/2">
+                    <h3 class="text-blue-300 font-bold tracking-widest uppercase text-sm mb-3" data-i18n="cooperation.subtitle">Global Network</h3>
+                    <h2 class="text-4xl font-bold mb-6" data-i18n="cooperation.title">连接全球医疗资源</h2>
+                    <p class="text-blue-100 mb-8 leading-relaxed text-lg" data-i18n="cooperation.description">
+                        我们在**中国、台湾、法国、美国及日本**建立广泛的科研与医疗合作网络。
+                    </p>
+                    <div class="grid grid-cols-2 gap-6">
+                        <div class="bg-white/10 backdrop-blur-sm p-4 rounded-lg border border-white/10">
+                            <div class="text-2xl font-bold text-white mb-1" data-i18n="cooperation.partner1.name">美兆健检</div>
+                            <div class="text-sm text-blue-200" data-i18n="cooperation.partner1.desc">战略合作伙伴</div>
+                        </div>
+                        <div class="bg-white/10 backdrop-blur-sm p-4 rounded-lg border border-white/10">
+                            <div class="text-2xl font-bold text-white mb-1" data-i18n="cooperation.partner2.name">爱睦/上顶</div>
+                            <div class="text-sm text-blue-200" data-i18n="cooperation.partner2.desc">深度医疗合作</div>
+                        </div>
+                        <div class="bg-white/10 backdrop-blur-sm p-4 rounded-lg border border-white/10">
+                            <div class="text-2xl font-bold text-white mb-1">PET-Aβ</div>
+                            <div class="text-sm text-blue-200" data-i18n="cooperation.partner3.desc">国际联合项目</div>
+                        </div>
+                        <div class="bg-white/10 backdrop-blur-sm p-4 rounded-lg border border-white/10">
+                            <div class="text-2xl font-bold text-white mb-1" data-i18n="cooperation.partner4.name">脂质中心</div>
+                            <div class="text-sm text-blue-200" data-i18n="cooperation.partner4.desc">代谢疾病研究</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="md:w-1/2 flex justify-center">
+                    <div class="relative w-full max-w-md aspect-square rounded-full border border-blue-500/30 flex items-center justify-center animate-[spin_60s_linear_infinite]">
+                        <div class="absolute inset-0 rounded-full border border-dashed border-blue-400/20"></div>
+                        <div class="absolute top-1/4 left-1/4 w-3 h-3 bg-white rounded-full shadow-[0_0_15px_rgba(255,255,255,0.8)]"></div>
+                        <div class="absolute bottom-1/3 right-1/4 w-2 h-2 bg-blue-300 rounded-full"></div>
+                        <div class="absolute top-1/2 right-0 w-2 h-2 bg-blue-300 rounded-full"></div>
+                        <div class="text-center">
+                            <div class="text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-br from-white to-blue-400">GLOBAL</div>
+                            <div class="text-xl tracking-[0.5em] text-blue-300 mt-2">PARTNERS</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="bg-slate-900 text-slate-400 py-12 text-center">
+        <div class="container mx-auto px-6">
+            <h5 class="text-white text-xl font-bold mb-2">安基昇 (ANJISHENG)</h5>
+            <div class="flex justify-center space-x-6 mb-8 text-sm">
+                <a href="javascript:void(0)" onclick="toggleModal(true)" class="hover:text-white transition" data-i18n="footer.contact">联系我们</a>
+                <a href="#" class="hover:text-white transition" data-i18n="footer.privacy">隐私政策</a>
+            </div>
+            <p class="text-xs text-slate-600" data-i18n="footer.copyright">© 2026 安基昇. All Rights Reserved.</p>
+        </div>
+    </footer>
+
+    <div id="contactModal" class="hidden fixed inset-0 z-[100] items-center justify-center p-4">
+        <div class="absolute inset-0 bg-slate-900/80 backdrop-blur-sm" onclick="toggleModal(false)"></div>
+        <div class="relative bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden border border-slate-200">
+            <div class="px-8 py-6 border-b border-slate-100 flex justify-between items-center">
+                <h3 class="text-xl font-bold text-slate-800" data-i18n="modal.title">核心团队成员</h3>
+                <button onclick="toggleModal(false)" class="text-slate-400 hover:text-slate-600 text-2xl">&times;</button>
+            </div>
+            <div class="p-8 space-y-8">
+                <div>
+                    <h4 class="text-lg font-bold text-slate-900">呂*豪 Kanuug-Hao (Kenny) Lu</h4>
+                    <p class="text-blue-600 text-sm font-semibold mb-3" data-i18n="modal.person1.role">首席文献官 / 共同创始人</p>
+                    <a href="mailto:kennyluck@alum.mit.edu" class="text-sm text-slate-500 flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" stroke-width="1.5"></path></svg>
+                        kennyluck@alum.mit.edu
+                    </a>
+                </div>
+                <div class="border-t border-slate-100"></div>
+                <div>
+                    <h4 class="text-lg font-bold text-slate-900">郭*哲 Mig Che Kuo</h4>
+                    <p class="text-blue-600 text-sm font-semibold mb-3" data-i18n="modal.person2.role">共同创始人</p>
+                    <a href="mailto:kuomingche0402@gmail.com" class="text-sm text-slate-500 flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" stroke-width="1.5"></path></svg>
+                        kuomingche0402@gmail.com
+                    </a>
+                </div>
+                <div class="border-t border-slate-100"></div>
+                <div>
+                    <h4 class="text-lg font-bold text-slate-900">郭*哲 Mng Che Kuo</h4>
+                    <p class="text-blue-600 text-sm font-semibold mb-3" data-i18n="modal.person3.role">顾问</p>
+                    <a href="mailto:kuomingche0402@gmail.com" class="text-sm text-slate-500 flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" stroke-width="1.5"></path></svg>
+                        kuomingche0402@gmail.com
+                    </a>
+                </div>
+            </div>
+            <div class="px-8 py-6 bg-slate-50 text-center">
+                <button onclick="toggleModal(false)" class="text-xs font-bold text-slate-400 tracking-[0.2em]" data-i18n="modal.close">CLOSE</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 多语言数据
+        const translations = {
+            'zh-CN': {
+                nav: {
+                    services: '核心服务',
+                    about: '关于我们',
+                    cooperation: '全球合作',
+                    contact: '联系专家'
+                },
+                hero: {
+                    tagline: '前沿生物科技 · 定义未来健康',
+                    title1: '解码生命表观遗传',
+                    title2: '预见精准健康未来',
+                    description: '安基昇 (Anjisheng) 致力于通过前沿的 DNA 甲基化检测与基因组学技术，为您提供全方位的疾病风险评估与生物年龄管理方案。',
+                    btn1: '探索生物年龄检测',
+                    btn2: '了解我们的技术'
+                },
+                services: {
+                    subtitle: 'Core Services',
+                    title: '核心业务领域',
+                    epigenetic: {
+                        title: '表观遗传检测 (Epigenetic)',
+                        desc: '基于 DNA 甲基化技术，精准锁定基因表达开关。',
+                        item1: '癌症早期筛查 (Cancer)',
+                        item2: '神经系统与发育疾病',
+                        item3: '生物年龄评估 (Biological Age)'
+                    },
+                    genetic: {
+                        title: '基因组学分析 (Genetic Test)',
+                        desc: '利用高通量测序技术，深度解析遗传密码。',
+                        item1: '基因突变 (Mutations)',
+                        item2: '遗传变异 (Variants)',
+                        item3: 'STR 亲缘/身份鉴定'
+                    },
+                    consult: {
+                        title: '医学科学咨询 (Consult)',
+                        desc: '从实验室数据到临床应用，提供个性化方案。',
+                        item1: '创始人与社长亲自领衔',
+                        item2: '全球顶尖顾问团队'
+                    }
+                },
+                cooperation: {
+                    subtitle: 'Global Network',
+                    title: '连接全球医疗资源',
+                    description: '我们在中国、台湾、法国、美国及日本建立广泛的科研与医疗合作网络。',
+                    partner1: { name: '美兆健检', desc: '战略合作伙伴' },
+                    partner2: { name: '爱睦/上顶', desc: '深度医疗合作' },
+                    partner3: { desc: '国际联合项目' },
+                    partner4: { name: '脂质中心', desc: '代谢疾病研究' }
+                },
+                footer: {
+                    contact: '联系我们',
+                    privacy: '隐私政策',
+                    copyright: '© 2026 安基昇. All Rights Reserved.'
+                },
+                modal: {
+                    title: '核心团队成员',
+                    person1: { 
+                        role: '首席文献官 / 共同创始人'
+                    },
+                    person2: { 
+                        role: '共同创始人'
+                    },
+                    person3: { 
+                        role: '顾问'
+                    },
+                    close: 'CLOSE'
+                }
+            },
+            'zh-TW': {
+                nav: {
+                    services: '核心服務',
+                    about: '關於我們',
+                    cooperation: '全球合作',
+                    contact: '聯繫專家'
+                },
+                hero: {
+                    tagline: '前沿生物科技 · 定義未來健康',
+                    title1: '解碼生命表觀遺傳',
+                    title2: '預見精準健康未來',
+                    description: '安基昇 (Anjisheng) 致力於通過前沿的 DNA 甲基化檢測與基因組學技術，為您提供全方位的疾病風險評估與生物年齡管理方案。',
+                    btn1: '探索生物年齡檢測',
+                    btn2: '了解我們的技術'
+                },
+                services: {
+                    subtitle: 'Core Services',
+                    title: '核心業務領域',
+                    epigenetic: {
+                        title: '表觀遺傳檢測 (Epigenetic)',
+                        desc: '基於 DNA 甲基化技術，精準鎖定基因表達開關。',
+                        item1: '癌症早期篩查 (Cancer)',
+                        item2: '神經系統與發育疾病',
+                        item3: '生物年齡評估 (Biological Age)'
+                    },
+                    genetic: {
+                        title: '基因組學分析 (Genetic Test)',
+                        desc: '利用高通量測序技術，深度解析遺傳密碼。',
+                        item1: '基因突變 (Mutations)',
+                        item2: '遺傳變異 (Variants)',
+                        item3: 'STR 親緣/身份鑑定'
+                    },
+                    consult: {
+                        title: '醫學科學諮詢 (Consult)',
+                        desc: '從實驗室數據到臨床應用，提供個性化方案。',
+                        item1: '創始人與社長親自領銜',
+                        item2: '全球頂尖顧問團隊'
+                    }
+                },
+                cooperation: {
+                    subtitle: 'Global Network',
+                    title: '連接全球醫療資源',
+                    description: '我們在中國、台灣、法國、美國及日本建立廣泛的科研與醫療合作網絡。',
+                    partner1: { name: '美兆健檢', desc: '戰略合作夥伴' },
+                    partner2: { name: '愛睦/上頂', desc: '深度醫療合作' },
+                    partner3: { desc: '國際聯合項目' },
+                    partner4: { name: '脂質中心', desc: '代謝疾病研究' }
+                },
+                footer: {
+                    contact: '聯繫我們',
+                    privacy: '隱私政策',
+                    copyright: '© 2026 安基昇. All Rights Reserved.'
+                },
+                modal: {
+                    title: '核心團隊成員',
+                    person1: { 
+                        role: '首席文獻官 / 共同創始人'
+                    },
+                    person2: { 
+                        role: '共同創始人'
+                    },
+                    person3: { 
+                        role: '顧問'
+                    },
+                    close: 'CLOSE'
+                }
+            },
+            'en': {
+                nav: {
+                    services: 'Services',
+                    about: 'About',
+                    cooperation: 'Cooperation',
+                    contact: 'Contact Expert'
+                },
+                hero: {
+                    tagline: 'Cutting-edge Biotechnology · Defining Future Health',
+                    title1: 'Decoding Life Epigenetics',
+                    title2: 'Envisioning Precision Health Future',
+                    description: 'Anjisheng is committed to providing comprehensive disease risk assessment and biological age management solutions through cutting-edge DNA methylation detection and genomics technology.',
+                    btn1: 'Explore Biological Age Testing',
+                    btn2: 'Learn About Our Technology'
+                },
+                services: {
+                    subtitle: 'Core Services',
+                    title: 'Core Business Areas',
+                    epigenetic: {
+                        title: 'Epigenetic Testing',
+                        desc: 'Based on DNA methylation technology, precisely targeting gene expression switches.',
+                        item1: 'Early Cancer Screening',
+                        item2: 'Neurological & Developmental Diseases',
+                        item3: 'Biological Age Assessment'
+                    },
+                    genetic: {
+                        title: 'Genomics Analysis',
+                        desc: 'Utilizing high-throughput sequencing technology to deeply decode genetic codes.',
+                        item1: 'Gene Mutations',
+                        item2: 'Genetic Variants',
+                        item3: 'STR Kinship/Identity Testing'
+                    },
+                    consult: {
+                        title: 'Medical Scientific Consultation',
+                        desc: 'From laboratory data to clinical application, providing personalized solutions.',
+                        item1: 'Led by Founder & President',
+                        item2: 'World-class Advisory Team'
+                    }
+                },
+                cooperation: {
+                    subtitle: 'Global Network',
+                    title: 'Connecting Global Medical Resources',
+                    description: 'We have established extensive research and medical cooperation networks in China, Taiwan, France, USA, and Japan.',
+                    partner1: { name: 'Mei Chao Health', desc: 'Strategic Partner' },
+                    partner2: { name: 'Ai Mu/Shang Ding', desc: 'Deep Medical Cooperation' },
+                    partner3: { desc: 'International Joint Project' },
+                    partner4: { name: 'Lipid Center', desc: 'Metabolic Disease Research' }
+                },
+                footer: {
+                    contact: 'Contact Us',
+                    privacy: 'Privacy Policy',
+                    copyright: '© 2026 Anjisheng. All Rights Reserved.'
+                },
+                modal: {
+                    title: 'Core Team Members',
+                    person1: { 
+                        role: 'Chief Bibliome Officer / Cofounder'
+                    },
+                    person2: { 
+                        role: 'Cofounder'
+                    },
+                    person3: { 
+                        role: 'Consultant'
+                    },
+                    close: 'CLOSE'
+                }
+            }
+        };
+
+        // 当前语言
+        let currentLang = localStorage.getItem('preferred-language') || 'zh-CN';
+
+        // 语言显示名称
+        const langNames = {
+            'zh-CN': '中文',
+            'zh-TW': '繁體',
+            'en': 'EN'
+        };
+
+        // 切换语言
+        function switchLanguage(lang) {
+            currentLang = lang;
+            localStorage.setItem('preferred-language', lang);
+            document.documentElement.lang = lang;
+            
+            // 更新所有文本
+            document.querySelectorAll('[data-i18n]').forEach(element => {
+                const key = element.getAttribute('data-i18n');
+                const keys = key.split('.');
+                let value = translations[lang];
+                
+                for (let k of keys) {
+                    value = value?.[k];
+                }
+                
+                if (value !== undefined) {
+                    element.textContent = value;
+                }
+            });
+
+            // 更新当前语言显示
+            document.getElementById('currentLang').textContent = langNames[lang];
+            
+            // 更新语言选项高亮
+            document.querySelectorAll('.lang-option').forEach(option => {
+                if (option.getAttribute('data-lang') === lang) {
+                    option.classList.add('active');
+                } else {
+                    option.classList.remove('active');
+                }
+            });
+
+            // 关闭下拉菜单
+            document.getElementById('langDropdown').classList.remove('show');
+        }
+
+        // 切换语言下拉菜单
+        function toggleLangDropdown() {
+            const dropdown = document.getElementById('langDropdown');
+            dropdown.classList.toggle('show');
+        }
+
+        // 点击外部关闭下拉菜单
+        document.addEventListener('click', function(event) {
+            const langSwitcher = document.querySelector('.lang-switcher');
+            if (langSwitcher && !langSwitcher.contains(event.target)) {
+                document.getElementById('langDropdown').classList.remove('show');
+            }
+        });
+
+        // 页面加载时应用保存的语言
+        document.addEventListener('DOMContentLoaded', function() {
+            switchLanguage(currentLang);
+        });
+
+        // 弹窗功能
+        function toggleModal(show) {
+            const modal = document.getElementById('contactModal');
+            if (show) {
+                modal.classList.add('modal-active');
+                document.body.style.overflow = 'hidden';
+            } else {
+                modal.classList.remove('modal-active');
+                document.body.style.overflow = 'auto';
+            }
+        }
+    </script>
+</body>
+</html>

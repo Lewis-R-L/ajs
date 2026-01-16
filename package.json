@@ -1,0 +1,17 @@
+{
+  "name": "anjisheng-website",
+  "version": "1.0.0",
+  "description": "安基昇 - 精准医疗与表观遗传检测网站",
+  "scripts": {
+    "dev": "npx serve .",
+    "build": "echo 'Static site - no build needed'"
+  },
+  "keywords": [
+    "medical",
+    "epigenetic",
+    "genetic-testing"
+  ],
+  "author": "Anjisheng",
+  "license": "MIT"
+}
+
